@@ -16,7 +16,9 @@ export default function Step1Info({ formData, updateFormData, onNext }) {
 
     try {
       for (const file of files) {
-        const storageRef = ref(storage, `listings/${Date.now()}_${file.name}`);
+        // Nettoyage du nom de fichier (suppression des espaces et parenthèses)
+        const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+        const storageRef = ref(storage, `listings/${Date.now()}_${cleanName}`);
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
         newPhotos.push(url);
@@ -192,7 +194,11 @@ export default function Step1Info({ formData, updateFormData, onNext }) {
       </div>
 
       <div className="flex justify-end pt-6 border-t border-slate-100">
-        <button type="submit" className="btn-primary">
+        <button 
+          type="submit" 
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!formData.address || !formData.price || !formData.photos?.length}
+        >
           Continuer
         </button>
       </div>

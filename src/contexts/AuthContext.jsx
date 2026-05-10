@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
   signInWithPopup
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../config/firebase';
 
 const AuthContext = createContext();
@@ -65,29 +65,36 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let unsubscribeUserDoc = null;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       
       if (user) {
-        // Écouter les changements du document utilisateur (crédits, rôle, etc.)
-        const fetchUserData = (uid, email) => {
-          const docRef = doc(db, 'users', uid);
-          return onSnapshot(docRef, (docSnap) => {
+        try {
+          // Garantir que le profil existe dans Firestore
+          await createUserProfile(user);
+          
+          // Écouter les changements du document utilisateur
+          const docRef = doc(db, 'users', user.uid);
+          unsubscribeUserDoc = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
               const data = docSnap.data();
-              // Force admin role for owner
-              if (email === 'sgregoire300@gmail.com') {
+              // Forcer le rôle admin pour le propriétaire
+              if (user.email === 'sgregoire300@gmail.com') {
                 data.role = 'admin';
               }
               setUserData(data);
-              setLoading(false);
             } else {
               setUserData(null);
-              setLoading(false);
             }
+            setLoading(false);
+          }, (error) => {
+            console.error("Erreur lors de l'écoute du profil:", error);
+            setLoading(false);
           });
-        };
-        unsubscribeUserDoc = fetchUserData(user.uid, user.email);
+        } catch (error) {
+          console.error("Erreur lors de l'initialisation de l'utilisateur:", error);
+          setLoading(false);
+        }
       } else {
         setUserData(null);
         setLoading(false);
@@ -100,13 +107,28 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  async function addCredits(amount) {
+    if (!currentUser) return;
+    const userRef = doc(db, 'users', currentUser.uid);
+    try {
+      await setDoc(userRef, {
+        credits: increment(amount)
+      }, { merge: true });
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de crédits:", error);
+      throw error;
+    }
+  }
+
   const value = {
     currentUser,
     userData,
     signup,
     login,
     logout,
-    loginWithGoogle
+    loginWithGoogle,
+    addCredits
   };
 
   return (

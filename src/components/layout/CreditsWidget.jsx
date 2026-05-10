@@ -1,26 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { db } from '../../config/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
 
 export default function CreditsWidget() {
-  const { currentUser } = useAuth();
-  const [credits, setCredits] = useState(0);
-
-  useEffect(() => {
-    if (!currentUser) return;
-    
-    // Écoute en temps réel du document utilisateur
-    const userRef = doc(db, 'users', currentUser.uid);
-    const unsubscribe = onSnapshot(userRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setCredits(docSnap.data().credits || 0);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [currentUser]);
+  const { userData } = useAuth();
+  
+  // Utilise les crédits du contexte global, ou 0 par défaut
+  const credits = userData?.credits ?? 0;
 
   return (
     <div className="bg-brand-dark p-4 rounded-xl border border-white/10 shadow-lg">

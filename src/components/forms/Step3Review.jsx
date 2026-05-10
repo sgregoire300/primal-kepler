@@ -22,13 +22,44 @@ export default function Step3Review({ formData, onBack }) {
         throw new Error("L'URL du Webhook n'est pas configurée.");
       }
 
-      // Préparation des données à envoyer
+      // Préparation enrichie des données à envoyer (compatibilité maximale)
       const payload = {
-        ...formData,
+        // Champs Propriété
+        address: formData.address,
+        price: formData.price,
+        rooms: formData.rooms,
+        highlights: formData.highlights,
+        script: formData.script,
+        photos: formData.photos || [],
+        
+        // Champs Avatar (Variantes pour Talking Photo et Video Avatar)
+        avatarUrl: formData.avatarUrl,
+        avatar_url: formData.avatarUrl,
+        talking_photo_url: formData.avatarUrl,
+        talking_photo_url_alternative: formData.avatarUrl,
+        avatarId: formData.avatarId || "",
+        avatar_id: formData.avatarId || "",
+        
+        // Champs Audio / Voix
+        voiceMode: formData.voiceMode,
+        voice_mode: formData.voiceMode,
+        voiceId: formData.voiceId || "",
+        voice_id: formData.voiceId || "",
+        audioUrl: formData.audioUrl || "",
+        audio_url: formData.audioUrl || "",
+        input_audio_url: formData.audioUrl || "",
+
+        // Aide pour Make.com (Automatisé)
+        heygen_voice_type: formData.voiceMode === 'heygen' ? 'text' : 'audio',
+        heygen_voice_id: formData.voiceMode === 'heygen' ? (formData.voiceId || 'Marie') : formData.audioUrl,
+        
+        // Metadata
         userEmail: currentUser?.email,
         userId: currentUser?.uid,
         timestamp: new Date().toISOString()
       };
+
+      console.log("Payload complet envoyé au webhook:", JSON.stringify(payload, null, 2));
 
       // 1. Envoi au Webhook Make.com
       const response = await fetch(MAKE_WEBHOOK_URL, {
@@ -107,14 +138,20 @@ export default function Step3Review({ formData, onBack }) {
               <span className="text-slate-500">Prix:</span>
               <span className="font-medium text-slate-900">{formData.price || "-"}</span>
             </li>
-            <li className="flex justify-between">
-              <span className="text-slate-500">Avatar:</span>
-              <span className="font-medium text-slate-900">{formData.avatarUrl}</span>
+            <li className="flex justify-between gap-4">
+              <span className="text-slate-500 shrink-0">Avatar:</span>
+              <span className="font-medium text-slate-900 truncate text-right">{formData.avatarUrl || "Non sélectionné"}</span>
             </li>
-            <li className="flex justify-between">
-              <span className="text-slate-500">Mode vocal:</span>
-              <span className="font-medium text-slate-900 capitalize">{formData.voiceMode}</span>
+            <li className="flex justify-between gap-4">
+              <span className="text-slate-500 shrink-0">Mode vocal:</span>
+              <span className="font-medium text-slate-900 capitalize text-right">{formData.voiceMode}</span>
             </li>
+            {formData.audioUrl && (
+              <li className="flex justify-between gap-4">
+                <span className="text-slate-500 shrink-0">Audio URL:</span>
+                <span className="font-medium text-slate-900 truncate text-right text-[10px]">{formData.audioUrl}</span>
+              </li>
+            )}
           </ul>
         </div>
 
