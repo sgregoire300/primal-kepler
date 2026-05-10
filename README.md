@@ -1,16 +1,38 @@
-# React + Vite
+# Primal Kepler - Immo-Avatar
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application de génération de vidéos immobilières avec jumeaux numériques (HeyGen integration).
 
-Currently, two official plugins are available:
+## 🚀 Guide de démarrage rapide pour Jules
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 1. Prérequis
+- Node.js (version 16+)
+- npm ou yarn
 
-## React Compiler
+### 2. Installation
+Clonez le dépôt et installez les dépendances :
+```bash
+git clone https://github.com/sgregoire300/primal-kepler.git
+cd primal-kepler
+npm install
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. Configuration (Crucial)
+Le projet utilise Firebase, PayPal et Make.com. Les clés ne sont pas sur GitHub.
+- Copiez le fichier `.env.example` et renommez-le en `.env`.
+- Demandez à Sylvain les valeurs pour remplir le fichier `.env`.
 
-## Expanding the ESLint configuration
+### 4. Lancement
+Pour lancer le serveur de développement local :
+```bash
+npm run dev
+```
+L'application sera accessible sur `http://localhost:5173`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Structure du Projet
+- `src/contexts/AuthContext.jsx` : Gestion de l'authentification et des crédits utilisateur.
+- `src/components/forms/` : Formulaire en 3 étapes pour la création d'annonces.
+- `src/pages/Library.jsx` : Bibliothèque des vidéos, avatars et voix.
+- `src/components/ui/VoiceRecorder.jsx` : Système d'enregistrement vocal personnalisé.
+
+## 🔗 Intégration Make.com / HeyGen
+L'envoi des données se fait dans `src/components/forms/Step3Review.jsx` vers un Webhook Make.com qui pilote ensuite HeyGen.
